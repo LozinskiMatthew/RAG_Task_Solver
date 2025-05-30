@@ -10,4 +10,4 @@
 #Ignore env file
 .env
 #Ignore kaggle config env
-kaggle.json
+RAG/kaggle.json

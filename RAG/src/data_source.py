@@ -13,11 +13,14 @@ import zipfile
 logger = get_logger(__name__)
 
 class DataSourcing:
-    def __init__(self, path=DOCTOR_DIALOGUE_PATH, target_folder="datasets/doctor_dialogue"):
+    def __init__(self, path=DOCTOR_DIALOGUE_PATH, target_folder="../datasets/doctor_dialogue"):
         self.path = path
         self.target_folder = target_folder
 
     def download_data_and_prepare_to_move(self):
+
+        os.environ["KAGGLE_CONFIG_DIR"] = r"C:\Users\lozin\Desktop\RAG_Task_Solver\RAG" # Should put it in .env in future
+
         dataset_slug = "xuehaihe/medical-dialogue-dataset"
         zip_filename = "medical-dialogue-dataset.zip"
         temp_path = "temp_medical_dialogue"
@@ -38,19 +41,28 @@ class DataSourcing:
 
     def move_and_remove(self):
         temp_path = self.download_data_and_prepare_to_move()
-        for item in os.listdir(temp_path):
-            source = os.path.join(temp_path, item)
-            destination = os.path.join(self.target_folder, item)
-            if os.path.isdir(source):
-                shutil.copytree(source, destination, dirs_exist_ok=True)
+        os.makedirs(self.target_folder, exist_ok=True)
+
+        for folder in os.listdir(temp_path):
+            folder_path = os.path.join(temp_path, folder)
+            if os.path.isdir(folder_path):
+                for item in os.listdir(folder_path):
+                    source = os.path.join(folder_path, item)
+                    destination = os.path.join(self.target_folder, item)
+                    if os.path.isdir(source):
+                        shutil.copytree(source, destination, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(source, destination)
             else:
+                source = folder_path
+                destination = os.path.join(self.target_folder, folder)
                 shutil.copy2(source, destination)
 
         shutil.rmtree(temp_path)
         if os.path.exists("medical-dialogue-dataset.zip"):
             os.remove("medical-dialogue-dataset.zip")
 
-        logger.info("Dataset now only exists in:", os.path.abspath(self.target_folder))
+        logger.info(f"Dataset now only exists in: {os.path.abspath(self.target_folder)}")
 
     def run(self):
         try:
