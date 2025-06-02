@@ -6,3 +6,5 @@ psycopg2-binary
 kagglehub
 numpy
 kaggle
+pymongo
+python-dotenv
